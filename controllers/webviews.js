@@ -29,7 +29,7 @@ module.exports = {
                 "message":
                     `Terimakasih atas reservasi anda di ruangan ${req.body.ruangan}
                     .\nSilahkan datang pada tanggal  ${req.body.tanggal}  dan waktu  ${req.body.jam_mulai}  -  ${req.body.jam_selesai}
-                    .\n Untuk membatalkan reservasi klik link di bawah ini.\n https://reservasi-ruangan.vercel.app/reservasi/cancel/  ${id}`, "telp": req.body.wa_pj
+                    .\n Untuk membatalkan reservasi klik link di bawah ini.\n https://rsudaa.singkawangkota.go.id/reservasi/cancel/${id}`, "telp": req.body.wa_pj
             });
             let config = {
                 method: 'post', maxBodyLength: Infinity, url: process.env.HOSTWA,
@@ -54,7 +54,7 @@ module.exports = {
     },
     async getReservasi(req, res) {
         try {
-            const reservasi = await Reservasi.findAll({
+            const dataReservasi = await Reservasi.findAll({
                 where: {
                     status: {
                         [Op.ne]: 'deleted'
@@ -68,9 +68,35 @@ module.exports = {
             return res.status(200).json({
                 status: true,
                 message: 'success',
-                data: reservasi
+                data: dataReservasi
             });
         } catch (err) {
+            return res.status(400).json({
+                status: false,
+                message: err.message,
+                data: null
+            });
+        }
+    },
+    async cancel(req, res) {
+        try {
+            console.log(req.params.id)
+            let dataID = Buffer.from(req.params.id, 'base64').toString('utf8').split(':');
+            console.log(dataID[1])
+            let del = await Reservasi.update(
+                { 'status': 'deleted' }, {
+                where: {
+                    id: dataID[1]
+                }
+            })
+            console.log(del)
+
+            res.cookie('status', 'Reservasi berhasil di batalkan', { maxAge: 900000 });
+
+            res.redirect('/reservasi/ruangan')
+        }
+        catch (err) {
+            console.log(err)
             return res.status(400).json({
                 status: false,
                 message: err.message,

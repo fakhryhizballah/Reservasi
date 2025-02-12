@@ -94,3 +94,25 @@ async function getReservasi() {
 
 }
 
+function getCookieStatus(params) {
+    const cookieStatus = document.cookie.split(';')
+        .find(c => c.trim().startsWith(params + '='));
+    return cookieStatus ? cookieStatus.split('=')[1] : null;
+}
+
+console.log(getCookieStatus('status'))
+
+if (getCookieStatus('status') != null) {
+    let status = getCookieStatus('status')
+    console.log(decodeURIComponent(status))
+    Swal.fire({
+        icon: 'success',
+        title: 'Succeed',
+        text: decodeURIComponent(status),
+        showConfirmButton: false,
+        timer: 3000
+    });
+    document.cookie = "status=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;";
+
+
+}
