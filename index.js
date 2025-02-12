@@ -6,7 +6,6 @@ require('dotenv').config();
 const {
     PORT = 3110
 } = process.env;
-console.log(process.env.JWT_SECRET_KEY);
 
 app.use(morgan('dev'));
 app.use(express.json());
