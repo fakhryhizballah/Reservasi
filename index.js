@@ -13,14 +13,14 @@ app.use(express.json());
 app.enable('trust proxy');
 
 
-app.use("/api/reservasi/assets/", express.static(path.join(__dirname + "/public/"), {
+app.use("/reservasi/assets/", express.static(path.join(__dirname + "/public/"), {
     setHeaders: (res, path, stat) => {
         res.set('Cache-Control', 'public, max-age=180');
     }
 }));
 
 const routes = require('./routes');
-app.use('/api/reservasi', routes);
+app.use('/reservasi', routes);
 
 app.use(function (err, req, res, next) {
     res.status(500).json({
