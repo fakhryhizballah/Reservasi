@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', function () {
             keterangan: document.getElementById('keterangan').value
         };
 
-        fetch('/api/reservasi/reservasi', {
+        fetch('/reservasi/reservasi', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 getReservasi();
 async function getReservasi() {
-    fetch('/api/reservasi/reservasi')
+    fetch('/reservasi/reservasi')
         .then(response => response.json())
         .then(data => {
             const tbody = document.querySelector('#listReservasi tbody');
