@@ -15,7 +15,7 @@ module.exports = (sequelize, DataTypes) => {
   }
   Reservasi.init({
     nama_pertemuan: DataTypes.STRING,
-    ruangan: DataTypes.id,
+    ruangan: DataTypes.STRING,
     pj: DataTypes.STRING,
     wa_pj: DataTypes.STRING,
     bidang: DataTypes.STRING,

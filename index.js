@@ -1,6 +1,6 @@
 const express = require('express');
 const morgan = require('morgan');
-const cors = require('cors')
+const path = require('path');
 const app = express();
 require('dotenv').config();
 const {
@@ -10,7 +10,7 @@ console.log(process.env.JWT_SECRET_KEY);
 
 app.use(morgan('dev'));
 app.use(express.json());
-app.use(cors())
+
 app.enable('trust proxy');
 
 

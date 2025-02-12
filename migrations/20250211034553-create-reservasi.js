@@ -10,6 +10,9 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       nama_pertemuan: {
+        type: Sequelize.STRING,
+      },
+      ruangan: {
         type: Sequelize.STRING
       },
       pj: {

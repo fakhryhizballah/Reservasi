@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reservasi Ruangan</title>
+ <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link rel="stylesheet" href="/api/reservasi/assets/css/reservasi.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Formulir Reservasi Ruangan</h2>
+        <form id="postReservasi" >
+               <div class="mb-3">
+            <label for="nama_pertemuan">Nama Kegiatan:</label>
+            <input type="text" id="nama_pertemuan" name="nama_pertemuan" required>
+            </div>
+       <div class="mb-3">
+            <label for="text">Penanggung Jawab:</label>
+            <input type="pj" id="pj" name="pj" placeholder="contoh: Devian Balado" required>
+            </div>
+         <div class="mb-3">
+            <label for="wa_pj">No Whatsapp Penanggung Jawab:</label>
+            <input type="number" min="9" id="wa_pj" name="wa_pj" placeholder="contoh: 08123456789" required>
+            </div>
+            <div class="mb-3">
+                <label for="bidang">Bidang:</label>
+                <input type="text" id="bidang" name="bidang" placeholder="contoh: Farmasi" required>
+            </div>
+            <div class="mb-3">
+            <label for="tanggal">Tanggal:</label>
+            <input type="date" id="tanggal" name="tanggal"  required>
+            </div>
+
+            <div class="d-flex gap-3">
+                <div>
+                    <label for="jam_mulai">Mulai:</label>
+                    <input type="time" id="jam_mulai" name="jam_mulai" required>
+                </div>
+                <div>
+                    <label for="jam_selesai">Selesai:</label>
+                    <input type="time" id="jam_selesai" name="jam_selesai" required>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="ruangan">Pilih Ruangan:</label>
+                <select id="ruangan" name="ruangan" required>
+                    <option value="Ruang Aula">Ruang Aula</option>
+                    <option value="Ruang Rapat IT">Ruang Rapat IT</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="keterangan" class="form-label">Keterangan:</label>
+                <textarea class="form-control" id="keterangan" name="keterangan" placeholder="Masukkan keterangan peralatan yang digunakan" rows="3"></textarea>
+            </div>
+
+
+            <button type="submit">Reservasi</button>
+        </form>
+    </div>
+    <div class="container mt-4">
+        <h2>Daftar Reservasi Ruangan</h2>
+        <div class="table-responsive">
+            <table id="listReservasi" >
+                <thead>
+                    <tr>
+                        <th>Nama Kegiatan</th>
+                        <th>Nama PJ</th>
+                        <th>Tanggal</th>
+                        <th>Waktu</th>
+                        <th>Ruangan</th>
+                        <th>Keterangan</th>
+                    </tr>
+                </thead>
+                <tbody>
+                
+                </tbody>
+            </table>
+        </div>
+    </div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="/api/reservasi/assets/js/reservasi.js"></script>
+</body>
+</html>
