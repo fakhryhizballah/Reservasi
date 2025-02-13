@@ -79,6 +79,32 @@ module.exports = {
     async cancel(req, res) {
         try {
             console.log(req.params.id)
+            // let dataID = Buffer.from(req.params.id, 'base64').toString('utf8').split(':');
+            // console.log(dataID[1])
+            // let del = await Reservasi.update(
+            //     { 'status': 'deleted' }, {
+            //     where: {
+            //         id: dataID[1]
+            //     }
+            // })
+            // console.log(del)
+
+            res.cookie('status', req.params.id, { maxAge: 900000 });
+
+            return res.redirect('/reservasi/ruangan')
+        }
+        catch (err) {
+            console.log(err)
+            return res.status(400).json({
+                status: false,
+                message: err.message,
+                data: null
+            });
+        }
+    },
+    async cancelPush(req, res) {
+        try {
+            console.log(req.params.id)
             let dataID = Buffer.from(req.params.id, 'base64').toString('utf8').split(':');
             console.log(dataID[1])
             let del = await Reservasi.update(
@@ -88,10 +114,13 @@ module.exports = {
                 }
             })
             console.log(del)
-
-            res.cookie('status', 'Reservasi berhasil di batalkan', { maxAge: 900000 });
-
-            return res.redirect('/reservasi/ruangan')
+            return res.status(200).json({
+                status: false,
+                message: 'success',
+                data: null
+            });
+            // res.cookie('status', req.params.id, { maxAge: 900000 });
+            // return res.redirect('/reservasi/ruangan')
         }
         catch (err) {
             console.log(err)

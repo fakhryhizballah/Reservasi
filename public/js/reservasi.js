@@ -105,12 +105,59 @@ console.log(getCookieStatus('status'))
 if (getCookieStatus('status') != null) {
     let status = getCookieStatus('status')
     console.log(decodeURIComponent(status))
+    // Swal.fire({
+    //     icon: 'success',
+    //     title: 'Succeed',
+    //     text: decodeURIComponent(status),
+    //     showConfirmButton: false,
+    //     timer: 3000
+    // });
     Swal.fire({
-        icon: 'success',
-        title: 'Succeed',
-        text: decodeURIComponent(status),
+        title: "Kamu Yakin mau membatalkan reservasi?",
+        text: "Anda tidak dapat mengembalikannya!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, delete it!"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch('/reservasi/cancel/' + encodeURIComponent(status), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status) {
+                        Swal.fire({
+                            title: "Deleted!",
+                            text: "Reservasi Anda telah dibatalkan.",
+                            icon: "success"
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Gagal membatalkan reservasi',
+                            showConfirmButton: false,
+                            timer: 2000
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error canceling reservation:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Gagal membatalkan reservasi',
         showConfirmButton: false,
-        timer: 3000
+                        timer: 2000
+                    });
+                });
+
+        }
     });
     document.cookie = "status=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;";
 
