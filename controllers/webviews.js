@@ -5,7 +5,7 @@ const axios = require('axios');
 module.exports = {
     async fomrReservasi(req, res) {
         try {
-            res.sendFile(path.join(__dirname, './../views/', 'index.html'));
+            return res.sendFile(path.join(__dirname, './../views/', 'index.html'));
 
         } catch (err) {
             return res.status(400).json({
@@ -17,7 +17,6 @@ module.exports = {
     },
     async postReservasi(req, res) {
         try {
-
             req.body.status = 'active';
             let restID = await Reservasi.create(req.body);
             let random = Math.floor(Math.random() * 10000)
@@ -38,11 +37,10 @@ module.exports = {
                 console.log(JSON.stringify(response.data));
             }).catch((error) => { console.log(error); });
 
-
             return res.status(200).json({
                 status: true,
                 message: 'success',
-                data: reservasi
+                data: restID
             })
         } catch (err) {
             return res.status(400).json({
@@ -93,7 +91,7 @@ module.exports = {
 
             res.cookie('status', 'Reservasi berhasil di batalkan', { maxAge: 900000 });
 
-            res.redirect('/reservasi/ruangan')
+            return res.redirect('/reservasi/ruangan')
         }
         catch (err) {
             console.log(err)
