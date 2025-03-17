@@ -138,9 +138,9 @@ if (getCookieStatus('status') != null) {
                         });
                     } else {
                         Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: 'Gagal membatalkan reservasi',
+                            icon: 'success',
+                            title: 'Deleted',
+                            text: 'Reservasi Anda telah dibatalkan.',
                             showConfirmButton: false,
                             timer: 2000
                         });
@@ -151,7 +151,7 @@ if (getCookieStatus('status') != null) {
                     Swal.fire({
                         icon: 'error',
                         title: 'Error',
-                        text: 'Gagal membatalkan reservasi',
+                        text: 'Reservasi telah dibatalkan',
         showConfirmButton: false,
                         timer: 2000
                     });
