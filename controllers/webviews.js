@@ -37,6 +37,19 @@ module.exports = {
                 console.log(JSON.stringify(response.data));
             }).catch((error) => { console.log(error); });
 
+            let data2 = JSON.stringify({
+                "message":
+                    `Terimakasih atas reservasi anda di ruangan ${req.body.ruangan}
+                    .\nSilahkan datang pada tanggal  ${req.body.tanggal}  dan waktu  ${req.body.jam_mulai}  -  ${req.body.jam_selesai}
+                    .\n Untuk membatalkan reservasi klik link di bawah ini.\n https://rsudaa.singkawangkota.go.id/reservasi/cancel/${id}`, "telp": process.env.WA_ADMIN
+            });
+            let config2 = {
+                method: 'post', maxBodyLength: Infinity, url: process.env.HOSTWA,
+                headers: { 'Content-Type': 'application/json', 'Authorization': process.env.SECRET_WA }, data: data2
+            }; axios.request(config2).then((response) => {
+                console.log(JSON.stringify(response.data));
+            }).catch((error) => { console.log(error); });
+
             return res.status(200).json({
                 status: true,
                 message: 'success',
