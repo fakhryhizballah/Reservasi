@@ -3,7 +3,7 @@
 document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('postReservasi').addEventListener('submit', function (event) {
         event.preventDefault(); // Mencegah form untuk melakukan submit pada halaman baru
-        console.log(document.getElementById('nama_pertemuan').value);
+        // console.log(document.getElementById('nama_pertemuan').value);
         let data = {
             nama_pertemuan: document.getElementById('nama_pertemuan').value,
             pj: document.getElementById('pj').value,
@@ -25,6 +25,16 @@ document.addEventListener('DOMContentLoaded', function () {
         })
             .then(response => response.json())
             .then(response => {
+                if (response.status == false) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: response.message,
+                        text: response.data,
+                        showConfirmButton: false,
+                        timer: 2000
+                    });
+                    return;
+                }
                 Swal.fire({
                     icon: 'success',
                     title: 'Succeed',
@@ -38,7 +48,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 getReservasi();
             })
             .catch(error => {
-                // console.log(error);
+                console.log(error);
                 Swal.fire({
                     icon: 'error',
                     title: 'Error',

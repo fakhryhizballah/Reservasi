@@ -2,6 +2,7 @@ const path = require('path');
 const { Reservasi } = require('../models');
 const { Op } = require('sequelize');
 const axios = require('axios');
+const { isTimeOverlap } = require('../helper/index.js')
 module.exports = {
     async fomrReservasi(req, res) {
         try {
@@ -18,6 +19,42 @@ module.exports = {
     async postReservasi(req, res) {
         try {
             req.body.status = 'active';
+
+
+            //validasi selsisih
+            let findAllBooking = await Reservasi.findAll({
+                where: {
+                    status: {
+                        [Op.ne]: 'deleted'
+                    },
+                    tanggal: {
+                        [Op.eq]: req.body.tanggal
+                    },
+                    ruangan: {
+                        [Op.eq]: req.body.ruangan
+                    }
+                }
+            })
+            // console.log(findAllBooking)
+            for (let x of findAllBooking) {
+                let check = isTimeOverlap(req.body.jam_mulai, req.body.jam_selesai, x.jam_mulai, x.jam_selesai)
+                console.log(check)
+                if (check) {
+                    return res.status(400).json({
+                        status: false,
+                        message: 'Ruangan tidak tersedia, ada kegiatan ' + x.nama_pertemuan,
+                        data: `Jam booking berikut telah terbooking: ${x.jam_mulai} - ${x.jam_selesai} `
+                    });
+                }
+            }
+            let check = isTimeOverlap(req.body.jam_mulai, req.body.jam_selesai, findAllBooking[0].jam_mulai, findAllBooking[0].jam_selesai)
+            if (check) {
+                return res.status(400).json({
+                    status: false,
+                    message: 'Ruangan tidak tersedia',
+                    data: null
+                });
+            }
             let restID = await Reservasi.create(req.body);
             let random = Math.floor(Math.random() * 10000)
             let random2 = Math.floor(Math.random() * 10000)
