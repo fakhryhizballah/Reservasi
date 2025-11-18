@@ -19,8 +19,6 @@ module.exports = {
     async postReservasi(req, res) {
         try {
             req.body.status = 'active';
-
-
             //validasi selsisih
             let findAllBooking = await Reservasi.findAll({
                 where: {
@@ -35,16 +33,17 @@ module.exports = {
                     }
                 }
             })
-            // console.log(findAllBooking)
-            for (let x of findAllBooking) {
-                let check = isTimeOverlap(req.body.jam_mulai, req.body.jam_selesai, x.jam_mulai, x.jam_selesai)
-                console.log(check)
-                if (check) {
-                    return res.status(400).json({
-                        status: false,
-                        message: 'Ruangan tidak tersedia, ada kegiatan ' + x.nama_pertemuan,
-                        data: `Jam booking berikut telah terbooking: ${x.jam_mulai} - ${x.jam_selesai} `
-                    });
+            if (findAllBooking.length > 0) {
+                for (let x of findAllBooking) {
+                    let check = isTimeOverlap(req.body.jam_mulai, req.body.jam_selesai, x.jam_mulai, x.jam_selesai)
+                    console.log(check)
+                    if (check) {
+                        return res.status(400).json({
+                            status: false,
+                            message: 'Ruangan tidak tersedia, ada kegiatan ' + x.nama_pertemuan,
+                            data: `Jam booking berikut telah terbooking: ${x.jam_mulai} - ${x.jam_selesai} `
+                        });
+                    }
                 }
             }
             let check = isTimeOverlap(req.body.jam_mulai, req.body.jam_selesai, findAllBooking[0].jam_mulai, findAllBooking[0].jam_selesai)
@@ -93,6 +92,7 @@ module.exports = {
                 data: restID
             })
         } catch (err) {
+            console.log(err)
             return res.status(400).json({
                 status: false,
                 message: err.message,
