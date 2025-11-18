@@ -46,14 +46,6 @@ module.exports = {
                     }
                 }
             }
-            let check = isTimeOverlap(req.body.jam_mulai, req.body.jam_selesai, findAllBooking[0].jam_mulai, findAllBooking[0].jam_selesai)
-            if (check) {
-                return res.status(400).json({
-                    status: false,
-                    message: 'Ruangan tidak tersedia',
-                    data: null
-                });
-            }
             let restID = await Reservasi.create(req.body);
             let random = Math.floor(Math.random() * 10000)
             let random2 = Math.floor(Math.random() * 10000)
