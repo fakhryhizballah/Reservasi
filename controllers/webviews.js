@@ -1,5 +1,5 @@
 const path = require('path');
-const { Reservasi } = require('../models');
+const { Reservasi, sequelize } = require('../models');
 const { Op } = require('sequelize');
 const axios = require('axios');
 const { isTimeOverlap } = require('../helper/index.js')
@@ -17,6 +17,7 @@ module.exports = {
         }
     },
     async postReservasi(req, res) {
+        let t = await sequelize.transaction();
         try {
             req.body.status = 'active';
             //validasi selsisih
@@ -32,7 +33,7 @@ module.exports = {
                         [Op.eq]: req.body.ruangan
                     }
                 }
-            })
+            }, { transaction: t });
             if (findAllBooking.length > 0) {
                 for (let x of findAllBooking) {
                     let check = isTimeOverlap(req.body.jam_mulai, req.body.jam_selesai, x.jam_mulai, x.jam_selesai)
@@ -46,7 +47,7 @@ module.exports = {
                     }
                 }
             }
-            let restID = await Reservasi.create(req.body);
+            let restID = await Reservasi.create(req.body, { transaction: t });
             let random = Math.floor(Math.random() * 10000)
             let random2 = Math.floor(Math.random() * 10000)
             let id = random2 + ':' + restID.id + ':' + random
@@ -77,13 +78,14 @@ module.exports = {
             }; axios.request(config2).then((response) => {
                 console.log(JSON.stringify(response.data));
             }).catch((error) => { console.log(error); });
-
+            await t.commit();
             return res.status(200).json({
                 status: true,
                 message: 'success',
                 data: restID
             })
         } catch (err) {
+            await t.rollback();
             console.log(err)
             return res.status(400).json({
                 status: false,

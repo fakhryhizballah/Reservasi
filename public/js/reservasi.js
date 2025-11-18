@@ -4,6 +4,12 @@ document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('postReservasi').addEventListener('submit', function (event) {
         event.preventDefault(); // Mencegah form untuk melakukan submit pada halaman baru
         // console.log(document.getElementById('nama_pertemuan').value);
+        Swal.fire({
+            title: 'Loading...',
+            html: '<i class="fa fa-spinner fa-spin"></i>',
+            showConfirmButton: false,
+            allowOutsideClick: false
+        });
         let data = {
             nama_pertemuan: document.getElementById('nama_pertemuan').value,
             pj: document.getElementById('pj').value,
