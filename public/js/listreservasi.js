@@ -1,83 +1,3 @@
-// Data Fallback (Diperbanyak agar bisa ditest fungsi scroll-nya)
-const mockDataFallback = {
-    "status": true,
-    "message": "success",
-    "data": [
-        {
-            "id": 284,
-            "nama_pertemuan": "Serah Terima Mahasiswa RPL Poltekkes Kemenkes",
-            "ruangan": "Ruang Aula",
-            "pj": "Mis Purnamaria",
-            "bidang": "Pelayanan Keperawatan dan Kebidanan",
-            "tanggal": "2026-03-30",
-            "jam_mulai": "08:00:00",
-            "jam_selesai": "00:00:00",
-            "keterangan": "Mempersiapkan sound system, proyektor, dan konsumsi peserta.",
-            "status": "active"
-        },
-        {
-            "id": 280,
-            "nama_pertemuan": "Survey PHBS dari Dinas Kesehatan",
-            "ruangan": "Ruang Aula",
-            "pj": "Witantri",
-            "bidang": "Umum",
-            "tanggal": "2026-03-31",
-            "jam_mulai": "08:00:00",
-            "jam_selesai": "12:00:00",
-            "keterangan": "Harap peserta membawa dokumen laporan semester lalu.",
-            "status": "active"
-        },
-        {
-            "id": 281,
-            "nama_pertemuan": "Rapat Evaluasi Kinerja Bulanan",
-            "ruangan": "Ruang Komite Medik",
-            "pj": "Dr. Handoko",
-            "bidang": "Pelayanan Medis",
-            "tanggal": "2026-04-01",
-            "jam_mulai": "10:00:00",
-            "jam_selesai": "14:00:00",
-            "keterangan": "Membahas evaluasi indikator mutu bulan Maret.",
-            "status": "active"
-        },
-        {
-            "id": 282,
-            "nama_pertemuan": "Pelatihan Bantuan Hidup Dasar (BHD)",
-            "ruangan": "Ruang Diklat",
-            "pj": "Budi Santoso",
-            "bidang": "SDM / Diklat",
-            "tanggal": "2026-04-02",
-            "jam_mulai": "08:00:00",
-            "jam_selesai": "16:00:00",
-            "keterangan": "Diikuti oleh seluruh pegawai baru RSUD.",
-            "status": "active"
-        },
-        {
-            "id": 283,
-            "nama_pertemuan": "Sosialisasi Penggunaan SIMRS Baru",
-            "ruangan": "Ruang Aula",
-            "pj": "Tim IT",
-            "bidang": "Teknologi Informasi",
-            "tanggal": "2026-04-03",
-            "jam_mulai": "09:00:00",
-            "jam_selesai": "11:30:00",
-            "keterangan": "Mohon setiap unit mengirimkan 1 perwakilan admin.",
-            "status": "active"
-        },
-        {
-            "id": 285,
-            "nama_pertemuan": "Pertemuan Komite Keperawatan",
-            "ruangan": "Ruang Pertemuan Lantai 2",
-            "pj": "Siti Aminah",
-            "bidang": "Komite Keperawatan",
-            "tanggal": "2026-04-04",
-            "jam_mulai": "13:00:00",
-            "jam_selesai": "15:00:00",
-            "keterangan": "Penyusunan panduan asuhan keperawatan terbaru.",
-            "status": "active"
-        }
-    ]
-};
-
 // Format Helper
 const formatTime = (timeStr) => {
     if (!timeStr) return '-';
@@ -254,7 +174,7 @@ async function fetchReservations() {
     const errorMessage = document.getElementById('error-message');
 
     try {
-        const response = await fetch('https://rsudaa.singkawangkota.go.id/reservasi/reservasi');
+        const response = await fetch('/reservasi/reservasi');
 
         if (!response.ok) throw new Error('Network response was not ok');
 
