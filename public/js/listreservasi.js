@@ -1,4 +1,82 @@
-// Data Fallback jika API gagal dimuat (CORS issue dll)
+// Data Fallback (Diperbanyak agar bisa ditest fungsi scroll-nya)
+const mockDataFallback = {
+    "status": true,
+    "message": "success",
+    "data": [
+        {
+            "id": 284,
+            "nama_pertemuan": "Serah Terima Mahasiswa RPL Poltekkes Kemenkes",
+            "ruangan": "Ruang Aula",
+            "pj": "Mis Purnamaria",
+            "bidang": "Pelayanan Keperawatan dan Kebidanan",
+            "tanggal": "2026-03-30",
+            "jam_mulai": "08:00:00",
+            "jam_selesai": "00:00:00",
+            "keterangan": "Mempersiapkan sound system, proyektor, dan konsumsi peserta.",
+            "status": "active"
+        },
+        {
+            "id": 280,
+            "nama_pertemuan": "Survey PHBS dari Dinas Kesehatan",
+            "ruangan": "Ruang Aula",
+            "pj": "Witantri",
+            "bidang": "Umum",
+            "tanggal": "2026-03-31",
+            "jam_mulai": "08:00:00",
+            "jam_selesai": "12:00:00",
+            "keterangan": "Harap peserta membawa dokumen laporan semester lalu.",
+            "status": "active"
+        },
+        {
+            "id": 281,
+            "nama_pertemuan": "Rapat Evaluasi Kinerja Bulanan",
+            "ruangan": "Ruang Komite Medik",
+            "pj": "Dr. Handoko",
+            "bidang": "Pelayanan Medis",
+            "tanggal": "2026-04-01",
+            "jam_mulai": "10:00:00",
+            "jam_selesai": "14:00:00",
+            "keterangan": "Membahas evaluasi indikator mutu bulan Maret.",
+            "status": "active"
+        },
+        {
+            "id": 282,
+            "nama_pertemuan": "Pelatihan Bantuan Hidup Dasar (BHD)",
+            "ruangan": "Ruang Diklat",
+            "pj": "Budi Santoso",
+            "bidang": "SDM / Diklat",
+            "tanggal": "2026-04-02",
+            "jam_mulai": "08:00:00",
+            "jam_selesai": "16:00:00",
+            "keterangan": "Diikuti oleh seluruh pegawai baru RSUD.",
+            "status": "active"
+        },
+        {
+            "id": 283,
+            "nama_pertemuan": "Sosialisasi Penggunaan SIMRS Baru",
+            "ruangan": "Ruang Aula",
+            "pj": "Tim IT",
+            "bidang": "Teknologi Informasi",
+            "tanggal": "2026-04-03",
+            "jam_mulai": "09:00:00",
+            "jam_selesai": "11:30:00",
+            "keterangan": "Mohon setiap unit mengirimkan 1 perwakilan admin.",
+            "status": "active"
+        },
+        {
+            "id": 285,
+            "nama_pertemuan": "Pertemuan Komite Keperawatan",
+            "ruangan": "Ruang Pertemuan Lantai 2",
+            "pj": "Siti Aminah",
+            "bidang": "Komite Keperawatan",
+            "tanggal": "2026-04-04",
+            "jam_mulai": "13:00:00",
+            "jam_selesai": "15:00:00",
+            "keterangan": "Penyusunan panduan asuhan keperawatan terbaru.",
+            "status": "active"
+        }
+    ]
+};
 
 // Format Helper
 const formatTime = (timeStr) => {
@@ -22,10 +100,51 @@ function updateClock() {
     return timeString; // Return for last update timestamp
 }
 
+// Variabel untuk Auto-scroll
+let autoScrollInterval;
+let scrollTimeout;
+
+// Fungsi Auto-scroll
+function startAutoScroll() {
+    const grid = document.getElementById('reservations-grid');
+
+    // Bersihkan interval sebelumnya jika ada
+    if (autoScrollInterval) clearInterval(autoScrollInterval);
+    if (scrollTimeout) clearTimeout(scrollTimeout);
+
+    // Beri jeda sebentar agar transisi masuk (fade-in) elemen selesai
+    scrollTimeout = setTimeout(() => {
+        // Jika konten tidak melebihi container layar, tidak perlu auto-scroll
+        if (grid.scrollHeight <= grid.clientHeight) return;
+
+        autoScrollInterval = setInterval(() => {
+            grid.scrollTop += 1; // Kecepatan scroll ke bawah (px)
+
+            // Cek apakah sudah mencapai bagian paling bawah konten
+            if (Math.ceil(grid.scrollTop + grid.clientHeight) >= grid.scrollHeight) {
+                clearInterval(autoScrollInterval); // Hentikan scroll
+
+                // Beri jeda 5 detik di bagian paling bawah
+                scrollTimeout = setTimeout(() => {
+                    grid.scrollTo({ top: 0, behavior: 'smooth' }); // Gulir kembali ke atas secara halus
+
+                    // Tunggu 3 detik di posisi atas, lalu mulai auto-scroll kembali
+                    scrollTimeout = setTimeout(startAutoScroll, 3000);
+                }, 5000);
+            }
+        }, 30); // Dieksekusi setiap 30 milidetik agar scroll terlihat halus
+    }, 5000); // Tunggu 5 detik di awal sebelum mulai jalan
+}
+
 // Render Data ke HTML
 function renderReservations(data) {
     const grid = document.getElementById('reservations-grid');
     const loading = document.getElementById('loading-indicator');
+
+    // Hentikan scroll saat me-render ulang
+    if (autoScrollInterval) clearInterval(autoScrollInterval);
+    if (scrollTimeout) clearTimeout(scrollTimeout);
+    grid.scrollTo({ top: 0 });
 
     // Filter hanya status active
     const activeData = data.filter(item => item.status && item.status.toLowerCase() === 'active');
@@ -42,13 +161,14 @@ function renderReservations(data) {
     } else {
         let htmlContent = '';
         activeData.forEach((item, index) => {
-            const delay = index * 0.15;
+            // Batasi delay animasi masuk maksimal 1 detik agar tidak terlalu lama untuk item ke-sekian
+            const delay = Math.min(index * 0.15, 1);
             const waktuSelesai = item.jam_selesai === "00:00:00" ? "Selesai" : formatTime(item.jam_selesai);
             const keterangan = item.keterangan ? item.keterangan : '-';
 
             htmlContent += `
                     <div 
-                        class="animate-fade-in-up bg-slate-800/50 backdrop-blur-xl border border-emerald-500/20 rounded-3xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.12)] flex flex-col justify-between hover:bg-slate-800/80 hover:border-emerald-500/40 transition-all duration-300 transform hover:scale-[1.02]"
+                        class="animate-fade-in-up bg-slate-800/50 backdrop-blur-xl border border-emerald-500/20 rounded-3xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.12)] flex flex-col justify-between hover:bg-slate-800/80 hover:border-emerald-500/40 transition-all duration-300"
                         style="animation-delay: ${delay}s"
                     >
                         <div>
@@ -116,9 +236,12 @@ function renderReservations(data) {
                     `;
         });
         grid.innerHTML = htmlContent;
+
+        // Jalankan fungsi auto scroll setelah selesai me-render DOM
+        startAutoScroll();
     }
 
-    // Inisialisasi ulang icon lucide untuk elemen HTML yang baru di-inject
+    // Inisialisasi ulang icon lucide
     lucide.createIcons();
 
     // Set update time di footer
@@ -131,7 +254,7 @@ async function fetchReservations() {
     const errorMessage = document.getElementById('error-message');
 
     try {
-        const response = await fetch('/reservasi/reservasi');
+        const response = await fetch('https://rsudaa.singkawangkota.go.id/reservasi/reservasi');
 
         if (!response.ok) throw new Error('Network response was not ok');
 
@@ -146,24 +269,20 @@ async function fetchReservations() {
     } catch (err) {
         console.warn("API gagal diakses, menggunakan data fallback simulasi.", err);
 
-        // Tampilkan pesan error
         errorMessage.textContent = "Menggunakan data simulasi (Koneksi API terputus / diblokir CORS)";
         errorAlert.classList.remove('hidden');
     }
 }
 
-// Inisialisasi awal
+// Inisialisasi awal saat layar dimuat
 window.onload = () => {
-    // Load icons pertama kali (untuk icon loading)
     lucide.createIcons();
 
-    // Mulai jam
     updateClock();
     setInterval(updateClock, 1000);
 
-    // Fetch data
     fetchReservations();
 
-    // Auto refresh setiap 5 Menit (300.000 ms)
+    // Auto refresh mengambil data API setiap 5 Menit (300.000 ms)
     setInterval(fetchReservations, 5 * 60 * 1000);
 };

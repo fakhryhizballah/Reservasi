@@ -11,12 +11,21 @@
     <!-- Lucide Icons CDN -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
-    <!-- Custom Animations -->
+    <!-- Custom Animations & Styling -->
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap');
         
         body {
             font-family: 'Inter', sans-serif;
+        }
+
+        /* Menyembunyikan Scrollbar agar terlihat rapi di TV/Kiosk */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
         }
 
         @keyframes fade-in-up {
@@ -36,7 +45,8 @@
         }
     </style>
 </head>
-<body class="min-h-screen bg-slate-900 text-slate-100 font-sans overflow-hidden flex flex-col relative">
+<!-- Mengubah min-h-screen menjadi h-screen agar footer benar-benar mentok bawah -->
+<body class="h-screen w-screen bg-slate-900 text-slate-100 font-sans overflow-hidden flex flex-col relative">
 
     <!-- Background Ornamen -->
     <div class="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
@@ -46,12 +56,12 @@
     </div>
 
     <!-- Header -->
-    <header class="z-10 bg-slate-800/60 backdrop-blur-xl border-b border-emerald-500/20 px-10 py-6 flex justify-between items-center shadow-2xl">
+    <header class="z-10 bg-slate-800/60 backdrop-blur-xl border-b border-emerald-500/20 px-10 py-6 flex justify-between items-center shadow-2xl shrink-0">
         <div class="flex items-center gap-6">
             <!-- Logo Container -->
             <div class="bg-white p-2 rounded-2xl shadow-[0_0_15px_rgba(16,185,129,0.3)] h-20 w-20 flex items-center justify-center shrink-0">
                 <img 
-                    src="/reservasi/assets/images/logo.png" 
+                    src="https://rsudaa.singkawangkota.go.id/assets/images/logo.png" 
                     alt="Logo RSUD" 
                     class="max-h-full max-w-full object-contain"
                     onerror="this.onerror=null; this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Lambang_Kota_Singkawang.png/220px-Lambang_Kota_Singkawang.png';"
@@ -87,25 +97,25 @@
         </div>
 
         <!-- Error State -->
-        <div id="error-alert" class="hidden bg-amber-500/20 border border-amber-500/50 text-amber-200 px-6 py-3 rounded-lg mb-6 text-xl mx-auto flex items-center gap-3">
+        <div id="error-alert" class="hidden bg-amber-500/20 border border-amber-500/50 text-amber-200 px-6 py-3 rounded-lg mb-6 text-xl mx-auto flex items-center gap-3 shrink-0">
             <i data-lucide="info" class="w-6 h-6"></i>
             <span id="error-message"></span>
         </div>
         
         <!-- Grid Data Reservasi -->
-        <div id="reservations-grid" class="hidden grid grid-cols-1 md:grid-cols-2 gap-8 h-full pb-10 overflow-y-auto pr-4">
+        <!-- flex-1 agar mengambil sisa ruang, hide-scrollbar menyembunyikan scrollbar -->
+        <div id="reservations-grid" class="hidden flex-1 grid grid-cols-1 md:grid-cols-2 gap-8 pb-10 overflow-y-auto pr-4 hide-scrollbar">
             <!-- Data akan dimuat disini menggunakan JavaScript -->
         </div>
 
     </main>
 
     <!-- Footer -->
-    <footer class="bg-slate-950 px-8 py-4 border-t border-emerald-900/50 text-xl text-emerald-600/60 flex justify-between z-10">
+    <footer class="bg-slate-950 px-8 py-4 border-t border-emerald-900/50 text-xl text-emerald-600/60 flex justify-between z-10 shrink-0">
         <div>Update terakhir: <span id="last-update">--:--:--</span></div>
         <div>&copy; 2026 RSUD dr. Abdul Aziz Singkawang</div>
     </footer>
 
     <!-- Aplikasi JavaScript -->
-     <script src="/reservasi/assets/js/listreservasi.js"></script>
 </body>
 </html>
