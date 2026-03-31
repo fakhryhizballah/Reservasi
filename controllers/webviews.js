@@ -28,6 +28,18 @@ module.exports = {
             });
         }
     },
+    async kamar(req, res) {
+        try {
+            return res.sendFile(path.join(__dirname, './../views/', 'kamar.html'));
+
+        } catch (err) {
+            return res.status(400).json({
+                status: false,
+                message: err.message,
+                data: null
+            });
+        }
+    },
     async postReservasi(req, res) {
         let t = await sequelize.transaction();
         try {

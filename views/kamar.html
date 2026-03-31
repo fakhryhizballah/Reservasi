@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ketersediaan Kamar Inap</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Tailwind Config & Custom CSS -->
+    <script>
+         tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        hospital: {
+                            bg: '#f8fafc', // slate-50
+                            card: '#ffffff',
+                            border: '#e2e8f0', // slate-200
+                            primary: '#0284c7', // sky-600
+                            success: '#059669', // emerald-600
+                            danger: '#dc2626', // red-600
+                            warning: '#d97706', // amber-600
+                            text: '#0f172a', // slate-900
+                            muted: '#64748b' // slate-500
+                        }
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.5s ease-out forwards',
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Sembunyikan scrollbar untuk tampilan Kiosk/TV */
+        ::-webkit-scrollbar {
+            display: none;
+        }
+        body {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        
+        .progress-bar {
+            width: 0%;
+            transition: width 1s linear;
+        }
+
+        .page-transition {
+            transition: opacity 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-hospital-bg text-hospital-text h-screen w-screen overflow-hidden flex flex-col font-sans">
+
+    <!-- Progress Bar Auto Refresh API (Atas) -->
+    <div class="h-1.5 w-full bg-slate-200 absolute top-0 left-0 z-50">
+        <div id="refresh-progress" class="h-full bg-hospital-primary progress-bar"></div>
+    </div>
+
+    <!-- Header -->
+    <header class="flex justify-between items-center p-6 bg-white shadow-sm border-b border-hospital-border z-10 relative">
+        <div class="flex items-center gap-6">
+            <!-- Icon Hospital -->
+           <div class="bg-white p-2 rounded-2xl shadow-[0_0_15px_rgba(16,185,129,0.3)] h-20 w-20 flex items-center justify-center shrink-0">
+                <img 
+                    src="/reservasi/assets/images/logo.png" 
+                    alt="Logo RSUD" 
+                    class="max-h-full max-w-full object-contain"
+                    loading="lazy"
+                />
+            </div>
+            <div>
+                <h1 class="text-3xl font-extrabold tracking-tight text-hospital-text ">Ketersediaan Kamar <span class="text-hospital-primary">RSUD dr. Abdul Aziz Singkawang </span> </h1>
+                <div class="flex items-center gap-2 mt-1">
+                    <span class="relative flex h-3 w-3">
+                      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                    </span>
+                    <p class="text-sm text-hospital-muted font-medium tracking-wide">Update Otomatis Terhubung</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-right flex flex-col items-end">
+            <h2 id="live-time" class="text-4xl font-extrabold text-hospital-primary tracking-widest tabular-nums">00:00:00</h2>
+            <p id="live-date" class="text-lg text-hospital-muted font-semibold mt-1">Senin, 01 Mar 2026</p>
+        </div>
+    </header>
+
+    <!-- Wrapper Utama (Flex-1) agar Footer tetap di bawah -->
+    <div class="flex-1 relative overflow-hidden flex flex-col bg-hospital-bg">
+        
+        <!-- Loader / Status (Overlay) -->
+        <div id="loading-indicator" class="absolute inset-0 z-20 flex flex-col items-center justify-center bg-white/80 backdrop-blur-sm transition-opacity duration-300">
+            <svg class="animate-spin h-12 w-12 text-hospital-primary mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <p class="text-xl font-semibold text-hospital-text animate-pulse">Memuat Data Kamar...</p>
+        </div>
+
+        <!-- Area Scroll Otomatis -->
+        <main id="scroll-container" class="flex-1 p-6 overflow-y-auto scroll-smooth">
+            <!-- Grid Container -->
+            <div id="room-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5 content-start opacity-0 transition-opacity duration-500">
+                <!-- Card items akan dirender dari JavaScript -->
+            </div>
+        </main>
+    </div>
+ <!-- Footer (Sticky di Bawah) -->
+    <footer class="bg-white px-6 py-4 border-t border-hospital-border shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] flex justify-between items-center z-10 relative">
+        <div class="flex items-center gap-4">
+            <p class="text-sm font-medium text-hospital-muted">Terakhir diperbarui: <span id="last-updated" class="font-bold text-hospital-text">-</span></p>
+            
+            <!-- Indikator Auto Scroll -->
+            <div id="scroll-indicator" class="hidden items-center gap-2 bg-sky-50 px-3 py-1 rounded-full text-sm font-bold text-hospital-primary border border-sky-100">
+                <svg class="w-4 h-4 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+                </svg>
+                <span>Auto-Scroll Aktif</span>
+            </div>
+        </div>
+        <p class="text-sm text-hospital-muted font-bold">RSUD dr. Abdul Aziz Singkawang &copy; <span id="current-year"></span></p>
+    </footer>
+   
+
+     <script src="/reservasi/assets/js/kamar.js"></script>
+</body>
+</html>
