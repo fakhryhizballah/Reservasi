@@ -81,7 +81,7 @@ module.exports = {
                 "message":
                     `Terimakasih atas reservasi anda di ruangan ${req.body.ruangan}
                     .\nSilahkan datang pada tanggal  ${req.body.tanggal}  dan waktu  ${req.body.jam_mulai}  -  ${req.body.jam_selesai}
-                    .\n Untuk membatalkan reservasi klik link di bawah ini.\n https://rsudaa.singkawangkota.go.id/reservasi/cancel/${id}`, "telp": req.body.wa_pj
+                    .\n Untuk membatalkan reservasi *${req.body.nama_pertemuan}* klik link di bawah ini.\n https://rsudaa.singkawangkota.go.id/reservasi/cancel/${id}`, "telp": req.body.wa_pj
             });
             let config = {
                 method: 'post', maxBodyLength: Infinity, url: process.env.HOSTWA,
@@ -92,9 +92,11 @@ module.exports = {
 
             let data2 = JSON.stringify({
                 "message":
-                    `Terimakasih atas reservasi anda di ruangan ${req.body.ruangan}
-                    .\nSilahkan datang pada tanggal  ${req.body.tanggal}  dan waktu  ${req.body.jam_mulai}  -  ${req.body.jam_selesai}
-                    .\n Untuk membatalkan reservasi klik link di bawah ini.\n https://rsudaa.singkawangkota.go.id/reservasi/cancel/${id}`, "telp": process.env.WA_ADMIN
+                    `Ada reservasi baru di ruangan *${req.body.ruangan}*
+                    .\n PJ: ${req.body.pj}
+                    .\n Nama Pertemuan: ${req.body.nama_pertemuan}
+                    .\n Tanggal :  ${req.body.tanggal}  dan waktu  ${req.body.jam_mulai}  -  ${req.body.jam_selesai}
+                    .\n Untuk membatalkan reservasi *${req.body.nama_pertemuan}* klik link di bawah ini.\n https://rsudaa.singkawangkota.go.id/reservasi/cancel/${id}`, "telp": process.env.WA_ADMIN
             });
             let config2 = {
                 method: 'post', maxBodyLength: Infinity, url: process.env.HOSTWA,
