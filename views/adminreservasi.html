@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Peminjaman Ruangan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3b82f6',
+                        secondary: '#10b981',
+                        danger: '#ef4444',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* Gray 100 */
+        }
+        
+        /* Animasi loading sederhana */
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Transisi untuk toast notification */
+        .toast-enter {
+            opacity: 0;
+            transform: translateY(100%);
+        }
+        .toast-enter-active {
+            opacity: 1;
+            transform: translateY(0);
+            transition: opacity 300ms, transform 300ms;
+        }
+        .toast-exit {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .toast-exit-active {
+            opacity: 0;
+            transform: translateY(100%);
+            transition: opacity 300ms, transform 300ms;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Menggunakan Font Awesome untuk Ikon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="text-gray-800 antialiased min-h-screen bg-gray-100 flex flex-col">
+
+    <!-- Header -->
+    <header class="h-16 bg-white shadow-sm flex items-center justify-between px-4 lg:px-8 z-10 sticky top-0">
+        <div class="flex items-center">
+            <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center mr-3 shadow-sm">
+                <i class="fas fa-calendar-alt text-white"></i>
+            </div>
+            <h1 class="text-xl font-bold text-gray-800 font-mono tracking-tight">RSUD <span class="text-blue-600">dr. Abdul Aziz</span></h1>
+            <span class="mx-3 text-gray-300">|</span>
+            <span class="text-sm font-medium text-gray-600 hidden sm:inline-block">Manajemen Jadwal Ruangan</span>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 p-4 lg:p-8 w-full">
+        <div class="max-w mx-auto">
+            
+            <!-- Filter & Actions -->
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 space-y-4 sm:space-y-0">
+                    <div class="flex space-x-2">
+                        <div class="relative">
+                            <input type="text" id="searchInput" placeholder="Cari pertemuan, PJ..." class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm w-full sm:w-64 shadow-sm">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fas fa-search text-gray-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <button onclick="fetchData()" class="bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors flex items-center">
+                        <i class="fas fa-sync-alt mr-2" id="refreshIcon"></i> Refresh Data
+                    </button>
+                </div>
+
+                <!-- Table Container -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden relative min-h-[400px]">
+                    
+                    <!-- Loading State -->
+                    <div id="loadingState" class="absolute inset-0 bg-white bg-opacity-90 flex flex-col items-center justify-center z-10 hidden">
+                        <div class="loader mb-4"></div>
+                        <p class="text-gray-500 font-medium">Memuat data...</p>
+                    </div>
+
+                    <!-- Error State -->
+                    <div id="errorState" class="absolute inset-0 bg-white flex flex-col items-center justify-center z-10 hidden">
+                        <i class="fas fa-exclamation-triangle text-red-500 text-4xl mb-4"></i>
+                        <p class="text-gray-800 font-medium text-lg">Gagal memuat data</p>
+                        <p class="text-gray-500 text-sm mb-4" id="errorMessage">Silakan coba lagi nanti.</p>
+                        <button onclick="fetchData()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">Coba Lagi</button>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div id="emptyState" class="absolute inset-0 bg-white flex flex-col items-center justify-center z-10 hidden">
+                        <div class="bg-gray-100 p-4 rounded-full mb-4">
+                            <i class="fas fa-calendar-times text-gray-400 text-3xl"></i>
+                        </div>
+                        <p class="text-gray-800 font-medium text-lg">Tidak ada data ditemukan</p>
+                        <p class="text-gray-500 text-sm">Coba sesuaikan filter pencarian Anda.</p>
+                    </div>
+
+                    <div class="overflow-x-auto w-full">
+                        <table class="w-full text-left border-collapse whitespace-nowrap">
+                            <thead>
+                                <tr class="bg-gray-50 text-gray-500 text-xs uppercase tracking-wider border-b border-gray-200">
+                                    <th class="px-6 py-4 font-medium">ID</th>
+                                    <th class="px-6 py-4 font-medium w-1/4">Pertemuan & Ruangan</th>
+                                    <th class="px-6 py-4 font-medium">Waktu Pelaksanaan</th>
+                                    <th class="px-6 py-4 font-medium">Penanggung Jawab</th>
+                                    <th class="px-6 py-4 font-medium text-center">Status</th>
+                                    <th class="px-6 py-4 font-medium text-right">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody" class="divide-y divide-gray-200 text-sm text-gray-700">
+                                <!-- Data baris akan dirender di sini oleh JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Pagination (Mock) -->
+                    <div class="border-t border-gray-200 px-6 py-3 flex items-center justify-between bg-gray-50">
+                        <div class="text-sm text-gray-500">
+                            Menampilkan <span class="font-medium text-gray-700" id="dataCount">0</span> data
+                        </div>
+                        <div class="flex space-x-1">
+                            <button class="px-3 py-1 border border-gray-300 rounded text-gray-500 bg-white hover:bg-gray-50 disabled:opacity-50" disabled><i class="fas fa-chevron-left"></i></button>
+                            <button class="px-3 py-1 border border-blue-500 rounded text-white bg-blue-600">1</button>
+                            <button class="px-3 py-1 border border-gray-300 rounded text-gray-500 bg-white hover:bg-gray-50 disabled:opacity-50" disabled><i class="fas fa-chevron-right"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+        </div>
+    </main>
+
+    <!-- Modal Konfirmasi Ubah Status -->
+    <div id="statusModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden flex items-center justify-center z-50 transition-opacity">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 overflow-hidden transform scale-95 transition-transform" id="statusModalContent">
+            <div class="p-6">
+                <div class="flex items-center justify-center w-12 h-12 mx-auto bg-blue-100 text-blue-600 rounded-full mb-4">
+                    <i class="fas fa-exchange-alt text-xl"></i>
+                </div>
+                <h3 class="text-lg font-bold text-center text-gray-900 mb-2">Konfirmasi Perubahan Status</h3>
+                <p class="text-gray-600 text-center mb-6 text-sm">
+                    Anda yakin ingin mengubah status pertemuan <br>
+                    <strong id="modalMeetingName" class="text-gray-800"></strong><br>
+                    menjadi <strong id="modalTargetStatus" class="capitalize"></strong>?
+                </p>
+                <div class="bg-gray-50 p-3 rounded-lg text-xs text-gray-500 mb-6 border border-gray-100">
+                    <p><strong>Ruangan:</strong> <span id="modalRoomName"></span></p>
+                    <p><strong>Tanggal:</strong> <span id="modalDate"></span></p>
+                </div>
+                <div class="flex space-x-3">
+                    <button onclick="closeModal()" class="flex-1 bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors font-medium">Batal</button>
+                    <button id="confirmStatusBtn" class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium flex justify-center items-center">
+                        <span id="confirmBtnText">Ya, Ubah Status</span>
+                        <div id="confirmBtnLoader" class="loader w-4 h-4 border-2 border-white border-t-transparent hidden ml-2"></div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col space-y-2"></div>
+
+    <script>
+        // --- STATE MANAGEMENT ---
+        // Data awal (mock data sesuai permintaan user)
+        // State aplikasi
+        let meetingsData = [];
+        let filteredData = [];
+        let currentActionItem = null; // Menyimpan item yang sedang akan diubah statusnya
+        
+        // Elemen DOM
+        const tableBody = document.getElementById('tableBody');
+        const loadingState = document.getElementById('loadingState');
+        const errorState = document.getElementById('errorState');
+        const emptyState = document.getElementById('emptyState');
+        const searchInput = document.getElementById('searchInput');
+        const dataCount = document.getElementById('dataCount');
+        const refreshIcon = document.getElementById('refreshIcon');
+        
+        // Modal DOM
+        const statusModal = document.getElementById('statusModal');
+        const statusModalContent = document.getElementById('statusModalContent');
+        const modalMeetingName = document.getElementById('modalMeetingName');
+        const modalTargetStatus = document.getElementById('modalTargetStatus');
+        const modalRoomName = document.getElementById('modalRoomName');
+        const modalDate = document.getElementById('modalDate');
+        const confirmStatusBtn = document.getElementById('confirmStatusBtn');
+        const confirmBtnText = document.getElementById('confirmBtnText');
+        const confirmBtnLoader = document.getElementById('confirmBtnLoader');
+
+        // --- HELPER FUNCTIONS ---
+        
+        // Format tanggal dari YYYY-MM-DD ke format lokal (misal: 10 Jul 2026)
+        function formatDate(dateString) {
+            const options = { year: 'numeric', month: 'short', day: 'numeric' };
+            const date = new Date(dateString);
+            return date.toLocaleDateString('id-ID', options);
+        }
+
+        // Memotong teks jika terlalu panjang
+        function truncateText(text, length = 30) {
+            if (!text) return '-';
+            return text.length > length ? text.substring(0, length) + '...' : text;
+        }
+
+        // --- CORE FUNCTIONS ---
+
+        // Fungsi utama untuk mengambil data (Mensimulasikan fetch API)
+        async function fetchData() {
+            showLoading();
+            
+            // Animasi icon refresh
+            refreshIcon.classList.add('fa-spin');
+
+            try {
+                // SIMULASI FETCH API (Dalam dunia nyata, gunakan fetch('URL_API_ANDA'))
+                // Contoh kode asli: const response = await fetch('api/ruangan'); const result = await response.json();
+                
+                // Menggunakan Promise dan setTimeout untuk mensimulasikan network delay (800ms)
+                const response = await fetch('/reservasi/reservasi');
+                 const result = await response.json();
+
+                if (result.status) {
+                    meetingsData = result.data;
+                    applyFilters(); // Terapkan filter yang sedang aktif
+                    hideLoading();
+                } else {
+                    throw new Error(result.message || 'Gagal mengambil data dari server');
+                }
+            } catch (error) {
+                console.error("Fetch error:", error);
+                showError(error.message);
+            } finally {
+                refreshIcon.classList.remove('fa-spin');
+            }
+        }
+
+        // Fungsi untuk merender data ke dalam tabel HTML
+        function renderTable(data) {
+            tableBody.innerHTML = ''; // Bersihkan tabel
+            
+            if (data.length === 0) {
+                emptyState.classList.remove('hidden');
+                return;
+            }
+            
+            emptyState.classList.add('hidden');
+
+            data.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-blue-50 transition-colors duration-150 group';
+                
+                // Menentukan warna badge status
+                let statusBadge = '';
+                let statusIcon = '';
+                if (item.status === 'active') {
+                    statusBadge = 'bg-green-100 text-green-800 border-green-200';
+                    statusIcon = '<span class="w-2 h-2 rounded-full bg-green-500 mr-1.5"></span>';
+                } else if (item.status === 'inactive') {
+                    statusBadge = 'bg-gray-100 text-gray-800 border-gray-200';
+                    statusIcon = '<span class="w-2 h-2 rounded-full bg-gray-500 mr-1.5"></span>';
+                } else if (item.status === 'pending') {
+                    statusBadge = 'bg-yellow-100 text-yellow-800 border-yellow-200';
+                    statusIcon = '<span class="w-2 h-2 rounded-full bg-yellow-500 mr-1.5"></span>';
+                } else {
+                    statusBadge = 'bg-blue-100 text-blue-800 border-blue-200';
+                    statusIcon = '<span class="w-2 h-2 rounded-full bg-blue-500 mr-1.5"></span>';
+                }
+
+                // Menentukan tombol aksi berdasarkan status
+                const actionBtnClass = item.status === 'active' 
+                    ? 'text-red-600 hover:text-red-900 hover:bg-red-50' 
+                    : 'text-green-600 hover:text-green-900 hover:bg-green-50';
+                
+                const actionBtnIcon = item.status === 'active' ? 'fa-ban' : 'fa-check-circle';
+                const actionBtnTitle = item.status === 'active' ? 'Nonaktifkan' : 'Aktifkan';
+
+                tr.innerHTML = `
+                    <td class="px-6 py-4">
+                        <span class="text-xs font-mono font-medium text-gray-500 border border-gray-200 rounded px-2 py-1 bg-gray-50">#${item.id}</span>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="font-semibold text-gray-900">${item.nama_pertemuan}</div>
+                        <div class="text-xs text-blue-600 font-medium mt-1 flex items-center">
+                            <i class="fas fa-map-marker-alt mr-1"></i> ${item.ruangan}
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="flex flex-col">
+                            <span class="text-gray-900"><i class="far fa-calendar mr-1 text-gray-400"></i> ${formatDate(item.tanggal)}</span>
+                            <span class="text-xs text-gray-500 mt-1"><i class="far fa-clock mr-1 text-gray-400"></i> ${item.jam_mulai.substring(0,5)} - ${item.jam_selesai.substring(0,5)}</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="text-gray-900 font-medium">${item.pj}</div>
+                        <div class="text-xs text-gray-500 mt-1 flex items-center">
+                            <i class="fab fa-whatsapp mr-1 text-green-500"></i> ${item.wa_pj}
+                        </div>
+                        <div class="text-xs text-gray-400 mt-0.5" title="${item.bidang}">${truncateText(item.bidang, 20)}</div>
+                    </td>
+                    <td class="px-6 py-4 text-center">
+                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium border capitalize ${statusBadge}">
+                            ${statusIcon}
+                            ${item.status}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                        <div class="flex justify-end space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button onclick='openStatusModal(${JSON.stringify(item).replace(/'/g, "&#39;")})' 
+                                    class="p-2 rounded-lg transition-colors flex items-center justify-center border border-transparent hover:border-current ${actionBtnClass}" 
+                                    title="${actionBtnTitle}">
+                                <i class="fas ${actionBtnIcon}"></i>
+                            </button>
+                        </div>
+                        <!-- Tampilan mobile untuk aksi (selalu terlihat) -->
+                        <div class="md:hidden flex justify-end mt-2">
+                             <button onclick='openStatusModal(${JSON.stringify(item).replace(/'/g, "&#39;")})' class="text-xs border px-2 py-1 rounded ${item.status === 'active' ? 'text-red-600 border-red-200' : 'text-green-600 border-green-200'}">${actionBtnTitle}</button>
+                        </div>
+                    </td>
+                `;
+                tableBody.appendChild(tr);
+            });
+            
+            dataCount.textContent = data.length;
+        }
+
+        // --- FILTERING & SEARCHING ---
+        function applyFilters() {
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            
+            filteredData = meetingsData.filter(item => {
+                // Pencarian text (Mencari di nama pertemuan, ruangan, atau nama PJ)
+                const matchSearch = 
+                    item.nama_pertemuan.toLowerCase().includes(searchTerm) ||
+                    item.ruangan.toLowerCase().includes(searchTerm) ||
+                    item.pj.toLowerCase().includes(searchTerm);
+                
+                // Filter status
+    
+                
+                return matchSearch;
+            });
+            
+            renderTable(filteredData);
+        }
+
+        // Event listeners untuk filter
+        searchInput.addEventListener('input', applyFilters);
+
+        // --- UI STATE MANAGERS ---
+        function showLoading() {
+            loadingState.classList.remove('hidden');
+            errorState.classList.add('hidden');
+            emptyState.classList.add('hidden');
+        }
+
+        function hideLoading() {
+            loadingState.classList.add('hidden');
+        }
+
+        function showError(message) {
+            hideLoading();
+            errorState.classList.remove('hidden');
+            document.getElementById('errorMessage').textContent = message;
+            tableBody.innerHTML = '';
+        }
+
+        // Fungsi untuk menampilkan notifikasi toast
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            
+            let bgClass, icon;
+            if(type === 'success') {
+                bgClass = 'bg-white border-l-4 border-green-500';
+                icon = '<i class="fas fa-check-circle text-green-500 text-xl mr-3"></i>';
+            } else if (type === 'error') {
+                bgClass = 'bg-white border-l-4 border-red-500';
+                icon = '<i class="fas fa-exclamation-circle text-red-500 text-xl mr-3"></i>';
+            }
+            
+            toast.className = `flex items-center p-4 rounded shadow-lg max-w-sm w-full transition-all duration-300 transform translate-y-full opacity-0 ${bgClass}`;
+            
+            toast.innerHTML = `
+                ${icon}
+                <div class="flex-1">
+                    <p class="text-sm font-medium text-gray-900">${message}</p>
+                </div>
+                <button class="text-gray-400 hover:text-gray-600 focus:outline-none" onclick="this.parentElement.remove()">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            document.getElementById('toastContainer').appendChild(toast);
+            
+            // Animasi masuk
+            requestAnimationFrame(() => {
+                toast.classList.remove('translate-y-full', 'opacity-0');
+            });
+            
+            // Auto hapus setelah 3 detik
+            setTimeout(() => {
+                toast.classList.add('translate-y-full', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // --- MODAL & ACTIONS ---
+        
+        // Membuka modal konfirmasi
+        function openStatusModal(item) {
+            currentActionItem = item;
+            const targetStatus = item.status === 'active' ? 'inactive' : 'active';
+            
+            // Populate modal data
+            modalMeetingName.textContent = item.nama_pertemuan;
+            modalTargetStatus.textContent = targetStatus;
+            modalTargetStatus.className = `capitalize font-bold ${targetStatus === 'active' ? 'text-green-600' : 'text-red-600'}`;
+            modalRoomName.textContent = item.ruangan;
+            modalDate.textContent = formatDate(item.tanggal);
+            
+            // Tampilkan modal dengan animasi
+            statusModal.classList.remove('hidden');
+            setTimeout(() => {
+                statusModalContent.classList.remove('scale-95');
+                statusModalContent.classList.add('scale-100');
+            }, 10);
+        }
+
+        // Menutup modal
+        function closeModal() {
+            statusModalContent.classList.remove('scale-100');
+            statusModalContent.classList.add('scale-95');
+            setTimeout(() => {
+                statusModal.classList.add('hidden');
+                currentActionItem = null;
+                
+                // Reset tombol state jika ditutup saat loading
+                confirmBtnText.classList.remove('hidden');
+                confirmBtnLoader.classList.add('hidden');
+                confirmStatusBtn.disabled = false;
+            }, 200); // Sesuaikan dengan durasi transisi CSS
+        }
+
+        // Mengeksekusi perubahan status (Mensimulasikan PUT/PATCH request)
+        async function updateStatus() {
+            // if (!currentActionItem) return;
+            
+            const newStatus = currentActionItem.status === 'active' ? 'deleted' : 'active';
+            const itemId = currentActionItem.id;
+            
+            // Set loading state pada tombol modal
+            confirmBtnText.classList.add('hidden');
+            confirmBtnLoader.classList.remove('hidden');
+            confirmStatusBtn.disabled = true;
+
+            try {
+                // SIMULASI FETCH API PUT/PATCH
+      console.log("Simulasi update status:", { id: itemId, newStatus });
+                const response = await fetch(`/reservasi/cancel/${itemId}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: newStatus })
+                });
+                // const result = await response.json();
+      
+                
+                // Simulasi network delay
+                const result = await new Promise((resolve) => {
+                    setTimeout(() => {
+                        resolve({ status: true, message: "Status berhasil diupdate" });
+                    }, 1000);
+                });
+
+                if (result.status) {
+                    // Update state lokal
+                    const itemIndex = meetingsData.findIndex(i => i.id === itemId);
+                    if (itemIndex !== -1) {
+                        meetingsData[itemIndex].status = newStatus;
+                        meetingsData[itemIndex].updatedAt = new Date().toISOString();
+                    }
+                    
+                    // Render ulang
+                    applyFilters();
+                    
+                    // Notifikasi & tutup modal
+                    showToast(`Status berhasil diubah menjadi ${newStatus}.`);
+                    closeModal();
+                } else {
+                    throw new Error('Gagal mengupdate status');
+                }
+
+            } catch (error) {
+                console.error("Update error:", error);
+                showToast(error.message, 'error');
+                
+                // Reset tombol jika gagal
+                confirmBtnText.classList.remove('hidden');
+                confirmBtnLoader.classList.add('hidden');
+                confirmStatusBtn.disabled = false;
+            }
+        }
+
+        // Event listener tombol konfirmasi di modal
+        confirmStatusBtn.addEventListener('click', updateStatus);
+
+        // --- INIT ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Muat data pertama kali
+            fetchData();
+        });
+
+    </script>
+</body>
+</html>

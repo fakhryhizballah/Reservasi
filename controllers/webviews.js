@@ -16,6 +16,18 @@ module.exports = {
             });
         }
     },
+    async adminReservasi(req, res) {
+        try {
+            return res.sendFile(path.join(__dirname, './../views/', 'adminreservasi.html'));
+
+        } catch (err) {
+            return res.status(400).json({
+                status: false,
+                message: err.message,
+                data: null
+            });
+        }
+    },
     async tvReservasi(req, res) {
         try {
             return res.sendFile(path.join(__dirname, './../views/', 'listreservasi.html'));
@@ -194,6 +206,27 @@ module.exports = {
         }
         catch (err) {
             console.log(err)
+            return res.status(400).json({
+                status: false,
+                message: err.message,
+                data: null
+            });
+        }
+    },
+    async cancelReservasi(req, res) {
+        try {
+            let del = await Reservasi.update(
+                { 'status': 'deleted' }, {
+                where: {
+                    id: req.params.id
+                }
+            })
+            return res.status(200).json({
+                status: true,
+                message: 'success',
+                data: del
+            });
+        } catch (err) {
             return res.status(400).json({
                 status: false,
                 message: err.message,
