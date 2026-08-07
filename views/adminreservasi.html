@@ -243,7 +243,7 @@
                 // Contoh kode asli: const response = await fetch('api/ruangan'); const result = await response.json();
                 
                 // Menggunakan Promise dan setTimeout untuk mensimulasikan network delay (800ms)
-                const response = await fetch('/reservasi/reservasi');
+                const response = await fetch('/reservasi/reservasi/admin');
                  const result = await response.json();
 
                 if (result.status) {
@@ -282,7 +282,7 @@
                 if (item.status === 'active') {
                     statusBadge = 'bg-green-100 text-green-800 border-green-200';
                     statusIcon = '<span class="w-2 h-2 rounded-full bg-green-500 mr-1.5"></span>';
-                } else if (item.status === 'inactive') {
+                } else if (item.status === 'deleted') {
                     statusBadge = 'bg-gray-100 text-gray-800 border-gray-200';
                     statusIcon = '<span class="w-2 h-2 rounded-full bg-gray-500 mr-1.5"></span>';
                 } else if (item.status === 'pending') {
@@ -300,15 +300,20 @@
                 
                 const actionBtnIcon = item.status === 'active' ? 'fa-ban' : 'fa-check-circle';
                 const actionBtnTitle = item.status === 'active' ? 'Nonaktifkan' : 'Aktifkan';
+                if (item.jumlah_peserta === null || item.jumlah_peserta === undefined) {
+                    item.jumlah_peserta = '';
+                } else {
+                    item.jumlah_peserta = item.jumlah_peserta + ' orang';
+                }
 
                 tr.innerHTML = `
                     <td class="px-6 py-4">
                         <span class="text-xs font-mono font-medium text-gray-500 border border-gray-200 rounded px-2 py-1 bg-gray-50">#${item.id}</span>
                     </td>
                     <td class="px-6 py-4">
-                        <div class="font-semibold text-gray-900">${item.nama_pertemuan}</div>
+                        <div class="font-semibold text-gray-900">${item.nama_pertemuan} <span class="text-xs text-gray-500 font-medium">${item.jumlah_peserta}</span></div>
                         <div class="text-xs text-blue-600 font-medium mt-1 flex items-center">
-                            <i class="fas fa-map-marker-alt mr-1"></i> ${item.ruangan}
+                            <i class="fas fa-map-marker-alt mr-1"></i> ${item.ruangan} 
                         </div>
                     </td>
                     <td class="px-6 py-4">
@@ -435,7 +440,7 @@
         // Membuka modal konfirmasi
         function openStatusModal(item) {
             currentActionItem = item;
-            const targetStatus = item.status === 'active' ? 'inactive' : 'active';
+            const targetStatus = item.status === 'active' ? 'deleted' : 'active';
             
             // Populate modal data
             modalMeetingName.textContent = item.nama_pertemuan;
@@ -481,16 +486,11 @@
 
             try {
                 // SIMULASI FETCH API PUT/PATCH
-      console.log("Simulasi update status:", { id: itemId, newStatus });
                 const response = await fetch(`/reservasi/cancel/${itemId}`, {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ status: newStatus })
                 });
-                // const result = await response.json();
-      
-                
-                // Simulasi network delay
                 const result = await new Promise((resolve) => {
                     setTimeout(() => {
                         resolve({ status: true, message: "Status berhasil diupdate" });

@@ -23,6 +23,7 @@ module.exports = (sequelize, DataTypes) => {
     jam_mulai: DataTypes.TIME,
     jam_selesai: DataTypes.TIME,
     keterangan: DataTypes.STRING,
+    jumlah_peserta: DataTypes.INTEGER,
     status: DataTypes.STRING
   }, {
     sequelize,

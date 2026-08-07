@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', function () {
             jam_mulai: document.getElementById('jam_mulai').value,
             jam_selesai: document.getElementById('jam_selesai').value,
             ruangan: document.getElementById('ruangan').value,
+            jumlah_peserta: document.getElementById('jumlah_peserta').value,
             keterangan: document.getElementById('keterangan').value
         };
 
@@ -83,7 +84,7 @@ async function getReservasi() {
                 row.appendChild(namaCell);
 
                 const emailCell = document.createElement('td');
-                emailCell.textContent = reservasi.pj; // Assuming 'pj' is used for email
+                emailCell.textContent = reservasi.pj;
                 row.appendChild(emailCell);
 
                 const tanggalCell = document.createElement('td');
@@ -97,6 +98,15 @@ async function getReservasi() {
                 const ruanganCell = document.createElement('td');
                 ruanganCell.textContent = reservasi.ruangan;
                 row.appendChild(ruanganCell);
+
+                const pesertaCell = document.createElement('td');
+                pesertaCell.textContent = reservasi.jumlah_peserta;
+                row.appendChild(pesertaCell);
+
+                const statusCell = document.createElement('td');
+                statusCell.textContent = reservasi.status;
+                row.appendChild(statusCell);
+
                 const keteranganCell = document.createElement('td');
                 keteranganCell.textContent = reservasi.keterangan;
                 row.appendChild(keteranganCell);

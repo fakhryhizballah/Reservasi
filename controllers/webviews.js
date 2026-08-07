@@ -55,13 +55,11 @@ module.exports = {
     async postReservasi(req, res) {
         let t = await sequelize.transaction();
         try {
-            req.body.status = 'active';
+            req.body.status = 'pending';
             //validasi selsisih
             let findAllBooking = await Reservasi.findAll({
                 where: {
-                    status: {
-                        [Op.ne]: 'deleted'
-                    },
+                    status: 'active',
                     tanggal: {
                         [Op.eq]: req.body.tanggal
                     },
@@ -70,6 +68,19 @@ module.exports = {
                     }
                 }
             }, { transaction: t });
+            // let findAllBooking = await Reservasi.findAll({
+            //     where: {
+            //         status: {
+            //             [Op.ne]: 'deleted'
+            //         },
+            //         tanggal: {
+            //             [Op.eq]: req.body.tanggal
+            //         },
+            //         ruangan: {
+            //             [Op.eq]: req.body.ruangan
+            //         }
+            //     }
+            // }, { transaction: t });
             if (findAllBooking.length > 0) {
                 for (let x of findAllBooking) {
                     let check = isTimeOverlap(req.body.jam_mulai, req.body.jam_selesai, x.jam_mulai, x.jam_selesai)
@@ -90,13 +101,13 @@ module.exports = {
             id = Buffer.from(id).toString('base64');
 
             let data = JSON.stringify({
-                "message":
-                    `Terimakasih atas reservasi anda di ruangan ${req.body.ruangan}
-                    .\nSilahkan datang pada tanggal  ${req.body.tanggal}  dan waktu  ${req.body.jam_mulai}  -  ${req.body.jam_selesai}
-                    .\n Untuk membatalkan reservasi *${req.body.nama_pertemuan}* klik link di bawah ini.\n https://rsudaa.singkawangkota.go.id/reservasi/cancel/${id}`, "telp": req.body.wa_pj
+                "message": `Terimakasih telah melakukan reservasi di ruangan ${req.body.ruangan}
+pada tanggal  ${req.body.tanggal}  dan waktu  ${req.body.jam_mulai}  -  ${req.body.jam_selesai}
+saat ini anda sedang menunggu konfirmasi dari admin.\n
+Untuk membatalkan reservasi *${req.body.nama_pertemuan}* klik link di bawah ini.\n https://rsudaa.singkawangkota.go.id/reservasi/cancel/${id}`, "telp": req.body.wa_pj
             });
             let config = {
-                method: 'post', maxBodyLength: Infinity, url: process.env.HOSTWA,
+                method: 'post', maxBodyLength: Infinity, url: process.env.HOSTWAGROUP,
                 headers: { 'Content-Type': 'application/json', 'Authorization': process.env.SECRET_WA }, data: data
             }; axios.request(config).then((response) => {
                 console.log(JSON.stringify(response.data));
@@ -104,11 +115,18 @@ module.exports = {
 
             let data2 = JSON.stringify({
                 "message":
-                    `Ada reservasi baru di ruangan *${req.body.ruangan}*
-                    .\n PJ: ${req.body.pj}
-                    .\n Nama Pertemuan: ${req.body.nama_pertemuan}
-                    .\n Tanggal :  ${req.body.tanggal}  dan waktu  ${req.body.jam_mulai}  -  ${req.body.jam_selesai}
-                    .\n Untuk membatalkan reservasi *${req.body.nama_pertemuan}* klik link di bawah ini.\n https://rsudaa.singkawangkota.go.id/reservasi/cancel/${id}`, "telp": process.env.WA_ADMIN
+                    `Ada reservasi ruangan baru.
+                    \n Nama Pertemuan  : ${req.body.nama_pertemuan}
+                    \n Tanggal         : ${req.body.tanggal}
+                    \n waktu           : ${req.body.jam_mulai} - ${req.body.jam_selesai}
+                    \n Status          : "Pending"
+                    \n Ruangan         : ${req.body.ruangan}
+                    \n Jumlah peserta  : ${req.body.jumlah_peserta}
+                    \n Penanggung Jawab: ${req.body.pj}
+                    \n kontak PJ       : ${req.body.wa_pj}
+                    \n Bidang          : ${req.body.bidang}
+                    \n Keterangan      : ${req.body.keterangan}
+                    \n Untuk membatalkan reservasi *${req.body.nama_pertemuan}* klik link di bawah ini.\n https://rsudaa.singkawangkota.go.id/reservasi/cancel/${id}`, "telp": process.env.WAGROUP
             });
             let config2 = {
                 method: 'post', maxBodyLength: Infinity, url: process.env.HOSTWA,
@@ -157,6 +175,30 @@ module.exports = {
                 data: null
             });
         }
+    },
+    async getReservasiadmin(req, res) {
+        try {
+            const dataReservasi = await Reservasi.findAll({
+                where: {
+                    tanggal: {
+                        [Op.gte]: new Date()
+                    }
+                },
+                order: [['tanggal', 'ASC'], ['jam_mulai', 'ASC']],
+            });
+            return res.status(200).json({
+                status: true,
+                message: 'success',
+                data: dataReservasi
+            });
+        } catch (err) {
+            return res.status(400).json({
+                status: false,
+                message: err.message,
+                data: null
+            });
+        }
+
     },
     async cancel(req, res) {
         try {
@@ -217,6 +259,27 @@ module.exports = {
         try {
             let del = await Reservasi.update(
                 { 'status': 'deleted' }, {
+                where: {
+                    id: req.params.id
+                }
+            })
+            return res.status(200).json({
+                status: true,
+                message: 'success',
+                data: del
+            });
+        } catch (err) {
+            return res.status(400).json({
+                status: false,
+                message: err.message,
+                data: null
+            });
+        }
+    },
+    async updateReservasi(req, res) {
+        try {
+            let del = await Reservasi.update(
+                { 'status': req.params.status }, {
                 where: {
                     id: req.params.id
                 }

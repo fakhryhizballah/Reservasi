@@ -9,8 +9,10 @@ router.get('/kamar', webviews.kamar);
 router.get('/cancel/:id', webviews.cancel);
 router.post('/cancel/:id', webviews.cancelPush);
 router.patch('/cancel/:id', webviews.cancelReservasi);
+router.patch('/update/:id/:status', webviews.updateReservasi);
 router.post('/reservasi', webviews.postReservasi);
 router.get('/reservasi', webviews.getReservasi);
+router.get('/reservasi/admin', webviews.getReservasiadmin);
 // router.get('/short', links.short);
 
 module.exports = router;
