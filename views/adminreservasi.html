@@ -182,6 +182,89 @@
             </div>
         </div>
     </div>
+    <!-- Modal Edit Data -->
+    <div id="editModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden flex items-center justify-center z-50 transition-opacity p-4">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl overflow-hidden transform scale-95 transition-transform flex flex-col max-h-[90vh]" id="editModalContent">
+            
+            <!-- Header Modal Edit -->
+            <div class="p-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
+                <h3 class="text-lg font-bold text-gray-900"><i class="fas fa-edit text-blue-500 mr-2"></i> Edit Data Pertemuan</h3>
+                <button onclick="closeEditModal()" class="text-gray-400 hover:text-gray-600 focus:outline-none"><i class="fas fa-times text-xl"></i></button>
+            </div>
+            
+            <!-- Body Modal Edit (Scrollable form) -->
+            <div class="p-6 overflow-y-auto flex-1">
+                <form id="editForm" class="space-y-4">
+                    <input type="hidden" id="editId">
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="col-span-1 md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Pertemuan</label>
+                            <input type="text" id="editNama" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Ruangan</label>
+                            <input type="text" id="editRuangan" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Jumlah Peserta</label>
+                            <div class="relative">
+                                <input type="number" id="editPeserta" class="w-full pl-3 pr-16 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                    <span class="text-gray-500 text-sm">orang</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Pelaksanaan</label>
+                            <input type="date" id="editTanggal" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+                        
+                        <div class="flex space-x-2">
+                            <div class="w-1/2">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Jam Mulai</label>
+                                <input type="time" id="editJamMulai" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                            </div>
+                            <div class="w-1/2">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Jam Selesai</label>
+                                <input type="time" id="editJamSelesai" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Penanggung Jawab (PJ)</label>
+                            <input type="text" id="editPj" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">No. WhatsApp PJ</label>
+                            <input type="text" id="editWa" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required placeholder="08...">
+                        </div>
+                        
+                        <div class="col-span-1 md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Bidang / Bagian</label>
+                            <input type="text" id="editBidang" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div class="col-span-1 md:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Catatan / Keterangan</label>
+                            <textarea id="editKeterangan" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Footer Modal Edit -->
+            <div class="p-4 border-t border-gray-200 flex justify-end space-x-3 bg-gray-50 rounded-b-xl">
+                <button type="button" onclick="closeEditModal()" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 font-medium transition-colors">Batal</button>
+                <button type="button" id="saveEditBtn" onclick="saveEditData()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium flex items-center transition-colors">
+                    <span id="saveBtnText">Simpan Perubahan</span>
+                    <div id="saveBtnLoader" class="loader w-4 h-4 border-2 border-white border-t-transparent hidden ml-2"></div>
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- Toast Notification Container -->
     <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col space-y-2"></div>
@@ -335,17 +418,27 @@
                             ${item.status}
                         </span>
                     </td>
-                    <td class="px-6 py-4 text-right">
-                        <div class="flex justify-end space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                     <td class="px-6 py-4 text-right">
+                        <!-- Desktop Actions (Hover) -->
+                        <div class="flex justify-end space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <!-- Tombol Edit -->
+                            <button onclick='openEditModal(${JSON.stringify(item).replace(/'/g, "&#39;")})' 
+                                    class="p-2 rounded-lg transition-colors flex items-center justify-center border border-transparent hover:border-blue-200 text-blue-600 hover:text-blue-900 hover:bg-blue-50" 
+                                    title="Edit Data">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <!-- Tombol Ubah Status -->
                             <button onclick='openStatusModal(${JSON.stringify(item).replace(/'/g, "&#39;")})' 
                                     class="p-2 rounded-lg transition-colors flex items-center justify-center border border-transparent hover:border-current ${actionBtnClass}" 
                                     title="${actionBtnTitle}">
                                 <i class="fas ${actionBtnIcon}"></i>
                             </button>
                         </div>
-                        <!-- Tampilan mobile untuk aksi (selalu terlihat) -->
-                        <div class="md:hidden flex justify-end mt-2">
-                             <button onclick='openStatusModal(${JSON.stringify(item).replace(/'/g, "&#39;")})' class="text-xs border px-2 py-1 rounded ${item.status === 'active' ? 'text-red-600 border-red-200' : 'text-green-600 border-green-200'}">${actionBtnTitle}</button>
+                        
+                        <!-- Mobile Actions (Selalu Terlihat) -->
+                        <div class="md:hidden flex justify-end mt-2 space-x-2">
+                             <button onclick='openEditModal(${JSON.stringify(item).replace(/'/g, "&#39;")})' class="text-xs border px-2 py-1 rounded text-blue-600 border-blue-200">Edit</button>
+                             <button onclick='openStatusModal(${JSON.stringify(item).replace(/'/g, "&#39;")})' class="text-xs border px-2 py-1 rounded ${item.status === 'active' ? 'text-red-600 border-red-200' : 'text-green-600 border-green-200'}">${item.status === 'active' ? 'Nonaktifkan' : 'Aktifkan'}</button>
                         </div>
                     </td>
                 `;
@@ -486,7 +579,7 @@
 
             try {
                 // SIMULASI FETCH API PUT/PATCH
-                const response = await fetch(`/reservasi/cancel/${itemId}`, {
+                const response = await fetch(`/reservasi/update/${itemId}/${newStatus}`, {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ status: newStatus })
@@ -528,6 +621,105 @@
 
         // Event listener tombol konfirmasi di modal
         confirmStatusBtn.addEventListener('click', updateStatus);
+
+        async function openEditModal(item) {
+            console.log("Opening edit modal for item:", item);
+
+            let jumlahPesertaValue = item.jumlah_peserta.split(' ')[0];
+
+            // Memasukkan data ke dalam form
+            document.getElementById('editId').value = item.id;
+            document.getElementById('editNama').value = item.nama_pertemuan;
+            document.getElementById('editRuangan').value = item.ruangan;
+            document.getElementById('editPeserta').value = jumlahPesertaValue;
+            document.getElementById('editTanggal').value = item.tanggal;
+            
+            // Format waktu untuk input type="time" (hanya butuh HH:MM)
+            document.getElementById('editJamMulai').value = item.jam_mulai ? item.jam_mulai.substring(0, 5) : '';
+            document.getElementById('editJamSelesai').value = item.jam_selesai ? item.jam_selesai.substring(0, 5) : '';
+            
+            document.getElementById('editPj').value = item.pj;
+            document.getElementById('editWa').value = item.wa_pj;
+            document.getElementById('editBidang').value = item.bidang;
+            document.getElementById('editKeterangan').value = item.keterangan;
+
+            // Menampilkan modal
+            editModal.classList.remove('hidden');
+            setTimeout(() => {
+                editModalContent.classList.remove('scale-95');
+                editModalContent.classList.add('scale-100');
+            }, 10);
+        }
+
+        function closeEditModal() {
+            editModalContent.classList.remove('scale-100');
+            editModalContent.classList.add('scale-95');
+            setTimeout(() => {
+                editModal.classList.add('hidden');
+                editForm.reset(); 
+                
+                // Reset loading button UI just in case
+                saveBtnText.classList.remove('hidden');
+                saveBtnLoader.classList.add('hidden');
+                saveEditBtn.disabled = false;
+            }, 200);
+        }
+
+        async function saveEditData() {
+            // Validasi native form
+            if (!editForm.checkValidity()) {
+                editForm.reportValidity();
+                return;
+            }
+
+            const itemId = document.getElementById('editId').value;
+            
+            // Mengambil data terbaru dari form
+            const updatedData = {
+                nama_pertemuan: document.getElementById('editNama').value,
+                ruangan: document.getElementById('editRuangan').value,
+                jumlah_peserta: document.getElementById('editPeserta').value ? parseInt(document.getElementById('editPeserta').value) : null,
+                tanggal: document.getElementById('editTanggal').value,
+                jam_mulai: document.getElementById('editJamMulai').value + ":00", // kembalikan detik format DB
+                jam_selesai: document.getElementById('editJamSelesai').value + ":00",
+                pj: document.getElementById('editPj').value,
+                wa_pj: document.getElementById('editWa').value,
+                bidang: document.getElementById('editBidang').value,
+                keterangan: document.getElementById('editKeterangan').value
+            };
+
+            // Loading state
+            saveBtnText.classList.add('hidden');
+            saveBtnLoader.classList.remove('hidden');
+            saveEditBtn.disabled = true;
+console.log("Saving updated data for item ID:", itemId, "with data:", updatedData);
+            try {
+                // SIMULASI FETCH API PUT
+                const response = await fetch(`/reservasi/ruangan/update/${itemId}`, { method: 'POST', method: 'POST',headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(updatedData) });
+                if (response.status) {
+                    // Update data lokal
+                    const itemIndex = meetingsData.findIndex(i => String(i.id) === String(itemId));
+                    if (itemIndex !== -1) {
+                        // Merge perubahan
+                        meetingsData[itemIndex] = { ...meetingsData[itemIndex], ...updatedData };
+                    }
+                    
+                    applyFilters(); // Render ulang tabel
+                    showToast('Data pertemuan berhasil diperbarui.', 'success');
+                    closeEditModal();
+                } else {
+                    throw new Error('Gagal memperbarui data');
+                }
+            } catch (error) {
+                showToast(error.message, 'error');
+            } finally {
+                // Kembalikan tombol seperti semula jika gagal
+                saveBtnText.classList.remove('hidden');
+                saveBtnLoader.classList.add('hidden');
+                saveEditBtn.disabled = false;
+            }
+        }
 
         // --- INIT ---
         document.addEventListener('DOMContentLoaded', () => {
