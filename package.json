@@ -1,0 +1,13 @@
+{
+  "name": "reservasi",
+  "version": "1.0.0",
+  "description": "Sistem Reservasi Ruangan Rumah Sakit (RSUD) yang dibangun dengan Node.js, Express, dan Sequelize. Proyek ini memfasilitasi peminjaman ruangan pertemuan, pengecekan ketersediaan jadwal, serta integrasi notifikasi melalui WhatsApp.",
+  "main": "index.js",
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
