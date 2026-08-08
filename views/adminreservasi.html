@@ -383,11 +383,16 @@
                 
                 const actionBtnIcon = item.status === 'active' ? 'fa-ban' : 'fa-check-circle';
                 const actionBtnTitle = item.status === 'active' ? 'Nonaktifkan' : 'Aktifkan';
-                if (item.jumlah_peserta === null || item.jumlah_peserta === undefined) {
-                    item.jumlah_peserta = '';
-                } else {
-                    item.jumlah_peserta = item.jumlah_peserta + ' orang';
+                try {
+                    let cek = item.jumlah_peserta.split(' ')[0];
+                }catch (error) {
+                     if (item.jumlah_peserta === null || item.jumlah_peserta === undefined || item.jumlah_peserta === '') {
+                            item.jumlah_peserta = '';
+                        } else {
+                            item.jumlah_peserta = item.jumlah_peserta + ' orang';
+                        }
                 }
+                  
 
                 tr.innerHTML = `
                     <td class="px-6 py-4">
@@ -623,8 +628,6 @@
         confirmStatusBtn.addEventListener('click', updateStatus);
 
         async function openEditModal(item) {
-            console.log("Opening edit modal for item:", item);
-
             let jumlahPesertaValue = item.jumlah_peserta.split(' ')[0];
 
             // Memasukkan data ke dalam form
@@ -692,7 +695,7 @@
             saveBtnText.classList.add('hidden');
             saveBtnLoader.classList.remove('hidden');
             saveEditBtn.disabled = true;
-console.log("Saving updated data for item ID:", itemId, "with data:", updatedData);
+
             try {
                 // SIMULASI FETCH API PUT
                 const response = await fetch(`/reservasi/ruangan/update/${itemId}`, { method: 'POST', method: 'POST',headers: {'Content-Type': 'application/json'},
