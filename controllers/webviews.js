@@ -119,7 +119,7 @@ saat ini anda sedang menunggu konfirmasi dari admin.\n
 Untuk membatalkan reservasi *${req.body.nama_pertemuan}* klik link di bawah ini.\n https://rsudaa.singkawangkota.go.id/reservasi/cancel/${id}`, "telp": req.body.wa_pj
             });
             let config = {
-                method: 'post', maxBodyLength: Infinity, url: process.env.HOSTWAGROUP,
+                method: 'post', maxBodyLength: Infinity, url: process.env.HOSTWA,
                 headers: { 'Content-Type': 'application/json', 'Authorization': process.env.SECRET_WA }, data: data
             }; axios.request(config).then((response) => {
                 console.log(JSON.stringify(response.data));
@@ -141,7 +141,7 @@ Untuk membatalkan reservasi *${req.body.nama_pertemuan}* klik link di bawah ini.
                     \n Untuk membatalkan reservasi *${req.body.nama_pertemuan}* klik link di bawah ini.\n https://rsudaa.singkawangkota.go.id/reservasi/cancel/${id}`, "telp": process.env.WAGROUP
             });
             let config2 = {
-                method: 'post', maxBodyLength: Infinity, url: process.env.HOSTWA,
+                method: 'post', maxBodyLength: Infinity, url: process.env.HOSTWAGROUP,
                 headers: { 'Content-Type': 'application/json', 'Authorization': process.env.SECRET_WA }, data: data2
             }; axios.request(config2).then((response) => {
                 console.log(JSON.stringify(response.data));
@@ -290,7 +290,39 @@ Untuk membatalkan reservasi *${req.body.nama_pertemuan}* klik link di bawah ini.
     },
     async updateReservasi(req, res) {
         try {
-            let del = await Reservasi.update(
+            let find = await Reservasi.findOne({
+                where: {
+                    id: req.params.id
+                }
+            })
+            if (req.params.status == 'deleted') {
+                let data = JSON.stringify({
+                    "message": `Pertemuan ${find.nama_pertemuan} dengan ruangan ${find.ruangan}
+pada tanggal  ${find.tanggal}  dan waktu  ${find.jam_mulai}  -  ${find.jam_selesai}
+sudah dibatalkan oleh Admin.`, "telp": find.wa_pj
+                });
+                let config = {
+                    method: 'post', maxBodyLength: Infinity, url: process.env.HOSTWA,
+                    headers: { 'Content-Type': 'application/json', 'Authorization': process.env.SECRET_WA }, data: data
+                }; axios.request(config).then((response) => {
+                    console.log(JSON.stringify(response.data));
+                }).catch((error) => { console.log(error); });
+            }
+            if (req.params.status == 'active') {
+
+                let data = JSON.stringify({
+                    "message": `Pertemuan ${find.nama_pertemuan} dengan ruangan ${find.ruangan}
+pada tanggal  ${find.tanggal}  dan waktu  ${find.jam_mulai}  -  ${find.jam_selesai}
+sudah dikonfirmasi oleh Admin.`, "telp": find.wa_pj
+                });
+                let config = {
+                    method: 'post', maxBodyLength: Infinity, url: process.env.HOSTWA,
+                    headers: { 'Content-Type': 'application/json', 'Authorization': process.env.SECRET_WA }, data: data
+                }; axios.request(config).then((response) => {
+                    console.log(JSON.stringify(response.data));
+                }).catch((error) => { console.log(error); });
+            }
+            let update = await Reservasi.update(
                 { 'status': req.params.status }, {
                 where: {
                     id: req.params.id
@@ -299,7 +331,44 @@ Untuk membatalkan reservasi *${req.body.nama_pertemuan}* klik link di bawah ini.
             return res.status(200).json({
                 status: true,
                 message: 'success',
-                data: del
+                data: update
+            });
+        } catch (err) {
+            return res.status(400).json({
+                status: false,
+                message: err.message,
+                data: null
+            });
+        }
+    },
+    async editReservasi(req, res) {
+        try {
+            console.log(req.params.id)
+            console.log(req.body)
+            const dataReservasi = await Reservasi.findOne({
+                where: {
+                    id: req.params.id
+                }
+            });
+            if (!dataReservasi) {
+                return res.status(404).json({
+                    status: false,
+                    message: 'data not found',
+                    data: null
+                });
+            }
+            console.log(req.params.body)
+            update = await Reservasi.update(
+                req.body, {
+                where: {
+                    id: req.params.id
+                }
+            }
+            )
+            return res.status(200).json({
+                status: true,
+                message: 'success',
+                data: req.body
             });
         } catch (err) {
             return res.status(400).json({
